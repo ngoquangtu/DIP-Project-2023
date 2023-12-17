@@ -148,6 +148,7 @@ class Ui_MainWindow(object):
         return result 
     
     def upload_generate_image(self,MainWindow,image):
+        image=cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
         height, width, channel = image.shape
         bytes_per_line = 3 * width
         q_image = QImage(image.data, width, height, bytes_per_line, QImage.Format_RGB888)
