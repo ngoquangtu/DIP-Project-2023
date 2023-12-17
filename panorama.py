@@ -4,38 +4,6 @@ import imutils
 
 class Panaroma:
 
-    def image_stitch(self, images, lowe_ratio=0.75, max_Threshold=4.0,match_status=False):
-
-        #detect the features and keypoints from SIFT
-        (imageB, imageA) = images
-        (KeypointsA, features_of_A) = self.Detect_Feature_And_KeyPoints(imageA)
-        (KeypointsB, features_of_B) = self.Detect_Feature_And_KeyPoints(imageB)
-
-        #got the valid matched points
-        Values = self.matchKeypoints(KeypointsA, KeypointsB,features_of_A, features_of_B, lowe_ratio, max_Threshold)
-
-        if Values is None:
-            return None
-
-        #to get perspective of image using computed homography
-        (matches, Homography, status) = Values
-        result_image = self.getwarp_perspective(imageA,imageB,Homography)
-        result_image[0:imageB.shape[0], 0:imageB.shape[1]] = imageB
-
-        # check to see if the keypoint matches should be visualized
-        if match_status:
-            vis = self.draw_Matches(imageA, imageB, KeypointsA, KeypointsB, matches,status)
-
-            return (result_image, vis)
-
-        return result_image
-
-    def getwarp_perspective(self,imageA,imageB,Homography):
-        val = imageA.shape[1] + imageB.shape[1]
-        result_image = cv2.warpPerspective(imageA, Homography, (val , imageA.shape[0]))
-
-        return result_image
-
     def Detect_Feature_And_KeyPoints(self, image):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -46,6 +14,8 @@ class Panaroma:
 
         Keypoints = np.float32([i.pt for i in Keypoints])
         return (Keypoints, features)
+
+
 
     def get_Allpossible_Match(self,featuresA,featuresB):
 
@@ -101,7 +71,36 @@ class Panaroma:
         vis[0:hB, wA:] = imageB
 
         return vis
+    def getwarp_perspective(self,imageA,imageB,Homography):
+        val = imageA.shape[1] + imageB.shape[1]
+        result_image = cv2.warpPerspective(imageA, Homography, (val , imageA.shape[0]))
 
+        return result_image
+    def image_stitch(self, images, lowe_ratio=1, max_Threshold=4.0,match_status=False):
+
+        #detect the features and keypoints from SIFT
+        (imageB, imageA) = images
+        (KeypointsA, features_of_A) = self.Detect_Feature_And_KeyPoints(imageA)
+        (KeypointsB, features_of_B) = self.Detect_Feature_And_KeyPoints(imageB)
+
+        #got the valid matched points
+        Values = self.matchKeypoints(KeypointsA, KeypointsB,features_of_A, features_of_B, lowe_ratio, max_Threshold)
+
+        if Values is None:
+            return None
+
+        #to get perspective of image using computed homography
+        (matches, Homography, status) = Values
+        result_image = self.getwarp_perspective(imageA,imageB,Homography)
+        result_image[0:imageB.shape[0], 0:imageB.shape[1]] = imageB
+
+        # check to see if the keypoint matches should be visualized
+        if match_status:
+            vis = self.draw_Matches(imageA, imageB, KeypointsA, KeypointsB, matches,status)
+
+            return (result_image, vis)
+
+        return result_image
 
     def draw_Matches(self, imageA, imageB, KeypointsA, KeypointsB, matches, status):
 
